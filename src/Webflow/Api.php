@@ -34,7 +34,7 @@ class Api
         return $this;
     }
 
-    private function request(string $path, string $method, array $data = [])
+    private function request(string $path, string $method,   $data = [])
     {
         $curl = curl_init();
         $options = [
@@ -52,6 +52,7 @@ class Api
         ];
         if (!empty($data)) {
             $json = json_encode($data);
+
             $options[CURLOPT_POSTFIELDS] = $json;
             $options[CURLOPT_HTTPHEADER][] = "Content-Length: " . strlen($json);
         }
@@ -59,7 +60,7 @@ class Api
         $response = curl_exec($curl);
         curl_close($curl);
         list($headers, $body) = explode("\r\n\r\n", $response, 2);
-        ray(['reaspnos body', $body]);
+
         return $this->parse($body);
     }
     private function get($path)
@@ -125,6 +126,13 @@ class Api
     public function publishSite(string $siteId, array $domains)
     {
         return $this->post("/sites/${siteId}/publish", $domains);
+    }
+
+    public function publishItem(string $collection_id, array $itemIds)
+    {
+        return $this->post("/collections/{$collection_id}/items/publish", [
+            'itemIds' => $itemIds,
+        ]);
     }
 
     // Collections
