@@ -188,10 +188,8 @@ class Api
 
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
     {
-         $item =$this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""), [
-            'fields' => $fields,
-        ]);
-         return $item;
+         return $this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""),  (object)  $fields);
+
     }
 
     public function removeItem(string $collectionId, $itemId)
