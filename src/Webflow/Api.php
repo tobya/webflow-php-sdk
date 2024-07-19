@@ -188,12 +188,9 @@ class Api
 
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
     {
-       // ray(['fields for updateitem', $fields]);
-       // unset($fields['_id']);
          $item =$this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""), [
             'fields' => $fields,
         ]);
-         //ray(['updateitem', $item]);
          return $item;
     }
 
