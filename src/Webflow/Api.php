@@ -173,10 +173,9 @@ class Api
             "isArchived" => false,
             "isDraft" => false,
         ];
-
-        return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""), [
-            'fields' => array_merge($defaults, $fields),
-        ]);
+        return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""),
+            (object)  $fields
+        );
     }
 
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
