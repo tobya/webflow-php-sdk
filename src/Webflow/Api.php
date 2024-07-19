@@ -6,7 +6,7 @@ use Webflow\WebflowException;
 
 class Api
 {
-    const WEBFLOW_API_ENDPOINT = 'https://api.webflow.com';
+    const WEBFLOW_API_ENDPOINT = 'https://api.webflow.com/v2';
     const WEBFLOW_API_USERAGENT = 'Expertlead Webflow PHP SDK (https://github.com/expertlead/webflow-php-sdk)';
 
     private $client;
@@ -59,6 +59,7 @@ class Api
         $response = curl_exec($curl);
         curl_close($curl);
         list($headers, $body) = explode("\r\n\r\n", $response, 2);
+        ray(['reaspnos body', $body]);
         return $this->parse($body);
     }
     private function get($path)
@@ -74,6 +75,12 @@ class Api
     private function put($path, $data)
     {
         return $this->request($path, "PUT", $data);
+    }
+
+
+    private function patch($path, $data)
+    {
+        return $this->request($path, "PATCH", $data);
     }
 
     private function delete($path)
@@ -145,11 +152,11 @@ class Api
     {
         $response = $this->items($collectionId);
         $items = $response->items;
-        $limit = $response->limit;
-        $total = $response->total;
+        $limit = $response->pagination->limit;
+        $total = $response->pagination->total;
         $pages = ceil($total / $limit);
         for ($page = 1; $page < $pages; $page++) {
-            $offset = $response->limit * $page;
+            $offset = $response->pagination->limit * $page;
             $items = array_merge($items, $this->items($collectionId, $offset, $limit)->items);
         }
         return $items;
@@ -174,9 +181,13 @@ class Api
 
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
     {
-        return $this->put("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""), [
+       // ray(['fields for updateitem', $fields]);
+       // unset($fields['_id']);
+         $item =$this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""), [
             'fields' => $fields,
         ]);
+         //ray(['updateitem', $item]);
+         return $item;
     }
 
     public function removeItem(string $collectionId, $itemId)
