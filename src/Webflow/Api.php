@@ -170,8 +170,8 @@ class Api
     public function createItem(string $collectionId, array $fields, bool $live = false)
     {
         $defaults = [
-            "_archived" => false,
-            "_draft" => false,
+            "isArchived" => false,
+            "isDraft" => false,
         ];
 
         return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""), [
