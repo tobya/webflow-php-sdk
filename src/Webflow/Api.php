@@ -95,12 +95,12 @@ class Api
     private function parse($response)
     {
         $json = json_decode($response);
-        if (isset($json->code) && isset($json->msg)) {
-            $error = $json->msg;
-            if (isset($json->problems)) {
-                $error .= PHP_EOL . implode(PHP_EOL, $json->problems);
+        if (isset($json->code) && isset($json->message)) {
+            $error = $json->message;
+            if (isset($json->details)) {
+                $error .= PHP_EOL . $json->code . ': ' . implode(PHP_EOL, $json->details) ;
             }
-            throw new \Exception($error, $json->code);
+            throw new \Exception($error);
         }
         return $json;
     }
