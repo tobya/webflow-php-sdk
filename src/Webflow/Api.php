@@ -178,20 +178,30 @@ class Api
         return $this->get("/collections/{$collectionId}/items/{$itemId}");
     }
 
-    public function createItem(string $collectionId, array $fields, bool $live = false)
+    public function createItem(string $collectionId,  $fields, bool $live = false)
     {
         $defaults = [
             "isArchived" => false,
             "isDraft" => false,
         ];
+        $data =  (object) [
+            'fieldData' => [],
+          ];
+        $data->fieldData = $fields;
         return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""),
-            (object)  $fields
+          $data
         );
+
     }
 
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
     {
-         return $this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""),  (object)  $fields);
+              $data =  (object) [
+            'fieldData' => [],
+          ];
+        $data->fieldData = $fields;
+
+         return $this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""),  $data);
 
     }
 
