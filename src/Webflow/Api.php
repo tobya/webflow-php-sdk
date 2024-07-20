@@ -6,6 +6,9 @@ use Webflow\WebflowException;
 
 class Api
 {
+      // changed api endpoints
+    // https://docs.developers.webflow.com/data/changelog/webflow-api-changed-endpoints
+    // https://docs.developers.webflow.com/data/reference/
     const WEBFLOW_API_ENDPOINT = 'https://api.webflow.com/v2';
     const WEBFLOW_API_USERAGENT = 'Expertlead Webflow PHP SDK (https://github.com/expertlead/webflow-php-sdk)';
 
