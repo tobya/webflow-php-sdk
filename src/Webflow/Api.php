@@ -6,7 +6,10 @@ use Webflow\WebflowException;
 
 class Api
 {
-    const WEBFLOW_API_ENDPOINT = 'https://api.webflow.com';
+      // changed api endpoints
+    // https://docs.developers.webflow.com/data/changelog/webflow-api-changed-endpoints
+    // https://docs.developers.webflow.com/data/reference/
+    const WEBFLOW_API_ENDPOINT = 'https://api.webflow.com/v2';
     const WEBFLOW_API_USERAGENT = 'Expertlead Webflow PHP SDK (https://github.com/expertlead/webflow-php-sdk)';
 
     private $client;
@@ -20,7 +23,7 @@ class Api
 
     public function __construct(
         $token,
-        $version = '1.0.0'
+        $version = '2.0.0'
     ) {
         if (empty($token)) {
             throw new WebflowException('token');
@@ -34,7 +37,7 @@ class Api
         return $this;
     }
 
-    private function request(string $path, string $method, array $data = [])
+    private function request(string $path, string $method,   $data = [])
     {
         $curl = curl_init();
         $options = [
@@ -52,6 +55,7 @@ class Api
         ];
         if (!empty($data)) {
             $json = json_encode($data);
+
             $options[CURLOPT_POSTFIELDS] = $json;
             $options[CURLOPT_HTTPHEADER][] = "Content-Length: " . strlen($json);
         }
@@ -59,6 +63,7 @@ class Api
         $response = curl_exec($curl);
         curl_close($curl);
         list($headers, $body) = explode("\r\n\r\n", $response, 2);
+
         return $this->parse($body);
     }
     private function get($path)
@@ -76,6 +81,12 @@ class Api
         return $this->request($path, "PUT", $data);
     }
 
+
+    private function patch($path, $data)
+    {
+        return $this->request($path, "PATCH", $data);
+    }
+
     private function delete($path)
     {
         return $this->request($path, "DELETE");
@@ -84,12 +95,12 @@ class Api
     private function parse($response)
     {
         $json = json_decode($response);
-        if (isset($json->code) && isset($json->msg)) {
-            $error = $json->msg;
-            if (isset($json->problems)) {
-                $error .= PHP_EOL . implode(PHP_EOL, $json->problems);
+        if (isset($json->code) && isset($json->message)) {
+            $error = $json->message;
+            if (isset($json->details)) {
+                $error .= PHP_EOL . $json->code . ': ' . implode(PHP_EOL, $json->details) ;
             }
-            throw new \Exception($error, $json->code);
+            throw new \Exception($error);
         }
         return $json;
     }
@@ -115,9 +126,38 @@ class Api
         return $this->get("/sites/{$siteId}/domains");
     }
 
-    public function publishSite(string $siteId, array $domains)
+    /**
+     * Publish site must take an array list of customdomains to be published to
+     * and a boolean indicating if your webflow.io subdomain should be published to
+     * @param string $siteId
+     * @param array $domains
+     * @param $publishWebflowSubdomain
+     * @return mixed
+     */
+    public function publishSite(string $siteId, array $domains, $publishWebflowSubdomain =  false)
     {
-        return $this->post("/sites/${siteId}/publish", $domains);
+        if (isset($domains['domains'])){
+            // backwards compatibility v1
+            $data = ['customDomains' => $domains['domains']];
+        } else {
+            // if  domains empty array then
+            if  (!$domains){
+                $data = [];
+            } else {
+                $data = ['customDomains' => $domains];
+            }
+        }
+
+        $data['publishToWebflowSubdomain'] = $publishWebflowSubdomain;
+
+        return $this->post("/sites/${siteId}/publish", $data);
+    }
+
+    public function publishItem(string $collection_id, array $itemIds)
+    {
+        return $this->post("/collections/{$collection_id}/items/publish", [
+            'itemIds' => $itemIds,
+        ]);
     }
 
     // Collections
@@ -145,11 +185,11 @@ class Api
     {
         $response = $this->items($collectionId);
         $items = $response->items;
-        $limit = $response->limit;
-        $total = $response->total;
+        $limit = $response->pagination->limit;
+        $total = $response->pagination->total;
         $pages = ceil($total / $limit);
         for ($page = 1; $page < $pages; $page++) {
-            $offset = $response->limit * $page;
+            $offset = $response->pagination->limit * $page;
             $items = array_merge($items, $this->items($collectionId, $offset, $limit)->items);
         }
         return $items;
@@ -160,23 +200,31 @@ class Api
         return $this->get("/collections/{$collectionId}/items/{$itemId}");
     }
 
-    public function createItem(string $collectionId, array $fields, bool $live = false)
+    public function createItem(string $collectionId,  $fields, bool $live = false)
     {
         $defaults = [
-            "_archived" => false,
-            "_draft" => false,
+            "isArchived" => false,
+            "isDraft" => false,
         ];
+        $data =  (object) [
+            'fieldData' => [],
+          ];
+        $data->fieldData = $fields;
+        return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""),
+          $data
+        );
 
-        return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""), [
-            'fields' => array_merge($defaults, $fields),
-        ]);
     }
 
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
     {
-        return $this->put("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""), [
-            'fields' => $fields,
-        ]);
+              $data =  (object) [
+            'fieldData' => [],
+          ];
+        $data->fieldData = $fields;
+
+         return $this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""),  $data);
+
     }
 
     public function removeItem(string $collectionId, $itemId)
