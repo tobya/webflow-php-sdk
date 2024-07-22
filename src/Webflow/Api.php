@@ -23,7 +23,7 @@ class Api
 
     public function __construct(
         $token,
-        $version = '1.0.0'
+        $version = '2.0.0'
     ) {
         if (empty($token)) {
             throw new WebflowException('token');
