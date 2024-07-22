@@ -126,9 +126,31 @@ class Api
         return $this->get("/sites/{$siteId}/domains");
     }
 
-    public function publishSite(string $siteId, array $domains)
+    /**
+     * Publish site must take an array list of customdomains to be published to
+     * and a boolean indicating if your webflow.io subdomain should be published to
+     * @param string $siteId
+     * @param array $domains
+     * @param $publishWebflowSubdomain
+     * @return mixed
+     */
+    public function publishSite(string $siteId, array $domains, $publishWebflowSubdomain =  false)
     {
-        return $this->post("/sites/${siteId}/publish", $domains);
+        if (isset($domains['domains'])){
+            // backwards compatibility v1
+            $data = ['customDomains' => $domains['domains']];
+        } else {
+            // if  domains empty array then
+            if  (!$domains){
+                $data = [];
+            } else {
+                $data = ['customDomains' => $domains];
+            }
+        }
+
+        $data['publishToWebflowSubdomain'] = $publishWebflowSubdomain;
+
+        return $this->post("/sites/${siteId}/publish", $data);
     }
 
     public function publishItem(string $collection_id, array $itemIds)
