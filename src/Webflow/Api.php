@@ -136,17 +136,13 @@ class Api
      */
     public function publishSite(string $siteId, array $domains, $publishWebflowSubdomain =  false)
     {
-        if (isset($domains['domains'])){
-            // backwards compatibility v1
-            $data = ['customDomains' => $domains['domains']];
+        // if  domains empty array then
+        if  (!$domains){
+            $data = [];
         } else {
-            // if  domains empty array then
-            if  (!$domains){
-                $data = [];
-            } else {
-                $data = ['customDomains' => $domains];
-            }
+            $data = ['customDomains' => $domains];
         }
+
 
         $data['publishToWebflowSubdomain'] = $publishWebflowSubdomain;
 
