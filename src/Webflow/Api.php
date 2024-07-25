@@ -136,23 +136,25 @@ class Api
      */
     public function publishSite(string $siteId, array $domains, $publishWebflowSubdomain =  false)
     {
-        if (isset($domains['domains'])){
-            // backwards compatibility v1
-            $data = ['customDomains' => $domains['domains']];
+        // if  domains empty array then
+        if  (!$domains){
+            $data = [];
         } else {
-            // if  domains empty array then
-            if  (!$domains){
-                $data = [];
-            } else {
-                $data = ['customDomains' => $domains];
-            }
+            $data = ['customDomains' => $domains];
         }
+
 
         $data['publishToWebflowSubdomain'] = $publishWebflowSubdomain;
 
         return $this->post("/sites/${siteId}/publish", $data);
     }
 
+  /**
+   * Publish just the items specified, rather than the entire site
+   * @param string $collection_id
+   * @param array $itemIds
+   * @return mixed
+   */
     public function publishItem(string $collection_id, array $itemIds)
     {
         return $this->post("/collections/{$collection_id}/items/publish", [
@@ -209,6 +211,7 @@ class Api
         $data =  (object) [
             'fieldData' => [],
           ];
+        // must be an object property
         $data->fieldData = $fields;
         return $this->post("/collections/{$collectionId}/items" . ($live ? "?live=true" : ""),
           $data
@@ -216,15 +219,22 @@ class Api
 
     }
 
+  /**
+   * Version 2 update item patches the item so you do not need to provide all details.
+   * @param string $collectionId
+   * @param string $itemId
+   * @param array $fields
+   * @param bool $live
+   * @return mixed
+   */
     public function updateItem(string $collectionId, string $itemId, array $fields, bool $live = false)
     {
-              $data =  (object) [
-            'fieldData' => [],
-          ];
+        $data =  (object) [
+          'fieldData' => [],
+        ];
+        // must be an object property
         $data->fieldData = $fields;
-
          return $this->patch("/collections/{$collectionId}/items/{$itemId}" . ($live ? "?live=true" : ""),  $data);
-
     }
 
     public function removeItem(string $collectionId, $itemId)

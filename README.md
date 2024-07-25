@@ -20,6 +20,10 @@ Implementation based on [Webflow CMS API Reference](https://developers.webflow.c
 - Patch Collection Item
 - Remove Collection Item
 
+## Version 2
+
+This package is now using Version 2 of the Webflow Api.
+
 ## Usage
 
 Check https://university.webflow.com/article/using-the-webflow-cms-api on how to generate `YOUR_WEBFLOW_API_TOKEN`
@@ -68,6 +72,24 @@ $webflow->updateItem($collectionId, $itemId, $fields);
 $webflow->removeItem($collectionId, $itemId);
 ```
 
+## Publising
+
+### Publishing Items
+Publishing an item or items can be done instead of publishing the entire site.
+```php
+$webflow->publishItem($collectionId, $itemIds);
+```
+
+### Publishing a Site
+
+```php
+$domains = [$domainID];
+// if you wish to publish to your mydomain.webflow.io subdomain you should specify
+// true.  If true $domains **must** be an empty array
+$publishWebflowSubdomain = true;
+$webflow->publishSite($siteId,$domains, $publishWebflowSubdomain)
+```
+**nb:** Webflow has very strict limits on publishing your site. Currently 1 per minute.
 
 ## Installation
 
