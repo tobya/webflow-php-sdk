@@ -241,7 +241,7 @@ class Api
 
     public function removeItem(string $collectionId, $itemId)
     {
-        return $this->delete("/collections/{$collectionId}/items/{$itemId}");
+	    return $this->delete("/collections/{$collectionId}/items/{$itemId}");
     }
 
     public function findOrCreateItemByName(string $collectionId, array $fields)
