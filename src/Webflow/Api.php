@@ -125,7 +125,7 @@ class Api
 
     public function domains(string $siteId)
     {
-        return $this->get("/sites/{$siteId}/domains");
+        return $this->get("/sites/{$siteId}/custom_domains");
     }
 
     /**
