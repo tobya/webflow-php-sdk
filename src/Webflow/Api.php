@@ -68,7 +68,7 @@ class Api
 
         return $this->parse($body);
     }
-    private function get($path)
+    public function get($path)
     {
         return $this->request($path, "GET");
     }
