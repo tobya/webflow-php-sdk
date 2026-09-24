@@ -98,6 +98,9 @@ class Api
     {
         $json = json_decode($response);
         if (isset($json->code) && isset($json->message)) {
+
+            Log::debug('Error Occurred in Webflow Api', [$response]);
+
             $error = $json->message;
             if (isset($json->details)) {
                 $error .= PHP_EOL . $json->code . ': ' . implode(PHP_EOL, $json->details) ;
